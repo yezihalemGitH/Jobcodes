@@ -15,7 +15,7 @@ log.push('','SAVED ON YOUR RESUME:','Education ('+ed.length+'): '+ed.join('; '),
 ex.forEach(function(t,i){log.push('- '+t+(co[i]?' @ '+co[i]:''))});
 log.push('Languages ('+la.length+'): '+la.join(', '));
 // skills: add only the ones not already there
-var si=null;[].forEach.call(document.querySelectorAll('input[type=text]'),function(e){if(si||e.name||e.id||!vis(e))return;var l=(e.placeholder||'')+' '+((e.closest('label,li,div')||{}).innerText||'');if(/skill/i.test(l))si=e});
+var si=null;[0,1].forEach(function(pass){[].forEach.call(document.querySelectorAll('input[type=text]'),function(e){if(si||e.name||e.id||(!pass&&!vis(e)))return;var l=(e.placeholder||'')+' '+((e.closest('label,li,div')||{}).innerText||'');if(/skill/i.test(l))si=e})});
 var box=si&&(si.closest('ul')||si.parentElement.parentElement),have=box?box.innerText.toLowerCase():'';
 var todo=(D.sk||[]).filter(function(s){return have.indexOf(s.toLowerCase())<0}),i=0;
 var ul=$&&$.fn.tagit&&si?$(si).closest('ul.tagit'):null;
