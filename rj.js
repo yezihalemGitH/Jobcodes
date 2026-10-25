@@ -1,8 +1,11 @@
-(function(){
+(async function(){
 // Reporter Jobs one-tap filler. On the profile or resume page it fills that page;
 // anywhere else on the site it opens both pages in a panel and fills them there.
 var base=(document.currentScript&&document.currentScript.src||'').replace(/[^\/]*$/,'');
 function run(win,f){var d=win.document;win.RJ=window.RJ;win.RJR=window.RJR;var s=d.createElement('script');s.src=base+f+'.js';d.body.appendChild(s)}
+if(window.RJZ&&!window.RJ){try{var z=Uint8Array.from(atob(window.RJZ),function(c){return c.charCodeAt(0)});
+var o=JSON.parse(await new Response(new Blob([z]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).text());window.RJ=o.RJ;window.RJR=o.RJR}catch(x){alert('rj: could not unpack data ('+x.message+')');return}}
+if(window.RJP&&window.RJ&&!window.RJ.img){try{var im=new Image();im.src='data:image/webp;base64,'+window.RJP;await im.decode();var cv=document.createElement('canvas');cv.width=im.naturalWidth;cv.height=im.naturalHeight;cv.getContext('2d').drawImage(im,0,0);window.RJ.img=cv.toDataURL('image/jpeg',0.92).split(',')[1]}catch(x){}}
 if(/my-resume/.test(location.search))return run(window,'rjresume');
 if(document.querySelector('[name=user_phone],[name=u_firstname]'))return run(window,'rjfix');
 var old=document.getElementById('rjpanel');if(old)old.remove();
