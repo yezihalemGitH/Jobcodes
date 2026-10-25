@@ -11,7 +11,7 @@ else{if(!e.value)return;var p=e.tagName=='TEXTAREA'?win.HTMLTextAreaElement.prot
 fire(e);e.style.background='#ffe0e0';n++});
 [].forEach.call(d.querySelectorAll('[name=jobsearch_field_resume_cover_letter],[name=user_bio]'),function(c){if(win.tinymce&&win.tinymce.editors)[].forEach.call(win.tinymce.editors,function(ed){try{if(ed.getElement()==c){ed.setContent('');ed.save()}}catch(x){}})});
 // entries: remove each saved education / experience / language block from the form
-var m=0,DEL=/(^|[^a-z])(del|delete|remove|rubbish|trash|bin)([^a-z]|$)|del-|delete|remove|rubbish|trash/i;win.__rjq=[];
+var m=0,DEL=/(^|[^a-z])(del|delete|remove|rubbish|trash|bin|times|close|xmark)([^a-z]|$)|del-|delete|remove|rubbish|trash|^\s*[×✕✖x]\s*$/i;win.__rjq=[];
 ['education','experience','lang'].forEach(function(t){var sel='[name="jobsearch_field_'+t+'_title[]"]';[].slice.call(d.querySelectorAll(sel)).forEach(function(e){var a=e,ctl=null;
 while(a.parentElement&&a.parentElement!=d.body&&a.parentElement.querySelectorAll(sel).length==1){a=a.parentElement;ctl=[].filter.call(a.querySelectorAll('a,button,i,span'),function(x){var t2=(x.className&&x.className.baseVal!=null?x.className.baseVal:x.className||'')+' '+(x.title||'')+' '+(x.getAttribute('aria-label')||'')+' '+(x.children.length?'':x.textContent||'');return DEL.test(t2)})[0];if(ctl)break}
 if(ctl){win.__rjq.push(ctl.closest('a,button')||ctl);m++}})});
