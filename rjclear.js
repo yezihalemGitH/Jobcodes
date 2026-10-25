@@ -15,6 +15,10 @@ var m=0,DEL=/(^|[^a-z])(del|delete|remove|rubbish|trash|bin|times|close|xmark)([
 ['education','experience','lang'].forEach(function(t){var sel='[name="jobsearch_field_'+t+'_title[]"]';[].slice.call(d.querySelectorAll(sel)).forEach(function(e){var a=e,ctl=null;
 while(a.parentElement&&a.parentElement!=d.body&&a.parentElement.querySelectorAll(sel).length==1){a=a.parentElement;ctl=[].filter.call(a.querySelectorAll('a,button,i,span'),function(x){var t2=(x.className&&x.className.baseVal!=null?x.className.baseVal:x.className||'')+' '+(x.title||'')+' '+(x.getAttribute('aria-label')||'')+' '+(x.children.length?'':x.textContent||'');return DEL.test(t2)})[0];if(ctl)break}
 if(ctl){win.__rjq.push(ctl.closest('a,button')||ctl);m++}})});
+// rows shown without form fields (e.g. languages): a delete button sitting next to an edit button
+function cls(x){return (x.className&&x.className.baseVal!=null?x.className.baseVal:x.className||'')+' '+(x.title||'')}
+[].forEach.call(d.querySelectorAll('a,button'),function(x){if(win.__rjq.indexOf(x)>=0||/account|profile/i.test(x.textContent))return;var me=cls(x)+' '+[].map.call(x.querySelectorAll('*'),cls).join(' ');if(!DEL.test(me))return;
+var p=x.parentElement,sib=p&&[].some.call(p.querySelectorAll('a,button,i'),function(y){return y!=x&&!x.contains(y)&&/edit|pencil|update/i.test(cls(y))});if(sib){win.__rjq.push(x);m++}});
 // skills: remove the tags next to the Add Skills box
 var si=null;[].forEach.call(d.querySelectorAll('input[type=text]'),function(e){if(si||e.name||e.id)return;var l=(e.placeholder||'')+' '+((e.closest('label,li,div')||{}).innerText||'');if(/skill/i.test(l))si=e});
 if(si){var ul=si.closest('ul');if(ul)[].slice.call(ul.children).forEach(function(li){if(!li.contains(si)){li.remove();k++}})}

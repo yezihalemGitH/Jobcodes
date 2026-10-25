@@ -32,7 +32,7 @@ var have2={edu:ed,expr:ex,lang:la},NM={edu:'Education',expr:'Experience',lang:'L
 function byId(id){return document.getElementById(id)}
 function setId(id,v){var e=byId(id);if(!e)return null;if(e.tagName=='SELECT')[].forEach.call(e.options,function(o){if(o.text.trim().toLowerCase()==v.toLowerCase())e.value=o.value});else setv(e,v);e.dispatchEvent(new Event('blur',{bubbles:true}));if($)try{$(e).trigger('change')}catch(x){}return e}
 function btn(el){var a=el.parentElement;while(a&&a!=document.body){var bs=a.querySelectorAll('button,input[type=submit],input[type=button],a');for(var k=0;k<bs.length;k++){var t=(bs[k].innerText||bs[k].value||'').trim();if(/^(\+\s*)?(add|save|submit|update)\b/i.test(t)&&!/cancel|close/i.test(t))return bs[k]}a=a.parentElement}return null}
-function items(){(D.items||[]).forEach(function(s){var h=have2[s[0]].map(function(x){return x.toLowerCase()});if(h.indexOf(s[1].toLowerCase())<0)add.push(s)});
+function items(){(D.items||[]).forEach(function(s){var h=have2[s[0]].map(function(x){return x.toLowerCase()});if(s[0]=='lang'&&[].some.call(document.querySelectorAll('body *:not(option):not(script)'),function(x){return [].filter.call(x.childNodes,function(t){return t.nodeType==3}).map(function(t){return t.textContent}).join('').trim().toLowerCase()==s[1].toLowerCase()&&vis(x)}))return;if(h.indexOf(s[1].toLowerCase())<0)add.push(s)});
 if(!add.length){log.splice(2,0,'OK: Education, experience, languages (all there)');return done()}next()}
 function next(){if(j>=add.length)return done();var s=add[j++],f;
 if(s[0]=='lang'){f=setId('add-lang-title',s[1]);setId('add-lang-level',s[2]);setId('add-lang-percentage',s[3])}
