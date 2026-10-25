@@ -28,6 +28,8 @@ txt('[name=jobsearch_field_user_dob_whole]',D.dob,'Date of birth');
 txt('[name=user_phone]',D.phone,'Phone');
 txt('[name=jobsearch_field_candidate_jobtitle]',D.title,'Job title');
 txt('[name=cand_user_twitter_url]',D.twitter,'Twitter');
+var R=window.RJR||{},bio=D.bio||(R.cl?R.cl.split(/\n\n/).slice(1,3).join('\n\n'):'');
+if(bio){txt('[name=user_bio]',bio,'Summary about yourself');var be=q('[name=user_bio]');if(be&&window.tinymce&&tinymce.editors)[].forEach.call(tinymce.editors,function(ed){try{if(ed.getElement()==be){ed.setContent(bio.replace(/\n/g,'<br>'));ed.save()}}catch(x){}})}
 var fs=q('select[name^="field-name-"]');if(fs){pick('select[name="'+fs.name+'"]',/^civil engineering$/i,'Field of study',1,/bio-?chemical/i)||pick('select[name="'+fs.name+'"]',/^civil/i,'Field of study',1,/bio-?chemical/i)}else log.push('NOT FOUND: Field of study');
 pick('[name="user_sector[]"]',/^engineering$/i,'Sector + Engineering');
 var c=q('[name=jobsearch_field_location_location1]');

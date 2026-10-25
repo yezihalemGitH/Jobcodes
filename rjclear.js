@@ -9,7 +9,7 @@ function fire(e){['input','change'].forEach(function(t){e.dispatchEvent(new Even
 if(e.tagName=='SELECT'){var was=e.multiple?e.selectedOptions.length:e.selectedIndex>0;if(!was)return;if(e.multiple)[].forEach.call(e.options,function(o){o.selected=false});else e.selectedIndex=0}
 else{if(!e.value)return;var p=e.tagName=='TEXTAREA'?win.HTMLTextAreaElement.prototype:win.HTMLInputElement.prototype;Object.getOwnPropertyDescriptor(p,'value').set.call(e,'')}
 fire(e);e.style.background='#ffe0e0';n++});
-var c=d.querySelector('[name=jobsearch_field_resume_cover_letter]');if(c&&win.tinymce&&tinymce.editors)[].forEach.call(win.tinymce.editors,function(ed){try{if(ed.getElement()==c){ed.setContent('');ed.save()}}catch(x){}});
+[].forEach.call(d.querySelectorAll('[name=jobsearch_field_resume_cover_letter],[name=user_bio]'),function(c){if(win.tinymce&&tinymce.editors)[].forEach.call(win.tinymce.editors,function(ed){try{if(ed.getElement()==c){ed.setContent('');ed.save()}}catch(x){}})});
 // skills: click each tag's remove button
 var k=0;[].forEach.call(d.querySelectorAll('.tagit-close,a.tagit-close,[class*=skill] [class*=remove],[class*=skill] [class*=close],[class*=skill] [class*=delete]'),function(x){try{x.click();k++}catch(e){}});
 return n+' fields emptied, '+k+' skills removed'}
