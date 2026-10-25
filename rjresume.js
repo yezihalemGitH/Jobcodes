@@ -10,12 +10,12 @@ function vals(n){return [].map.call(document.querySelectorAll('[name="'+n+'[]"]'
 var ed=vals('jobsearch_field_education_title'),ex=vals('jobsearch_field_experience_title'),co=vals('jobsearch_field_experience_company'),la=vals('jobsearch_field_lang_title');
 
 function key(e,k){['keydown','keypress','keyup'].forEach(function(x){e.dispatchEvent(new KeyboardEvent(x,{key:k==13?'Enter':',',keyCode:k,which:k,bubbles:true}))});if($)try{$(e).trigger($.Event('keydown',{keyCode:k,which:k}))}catch(x){}}
-function addOne(){if(i>=todo.length){log.splice(1,0,si?'OK: Skills ('+todo.length+' added, '+((D.sk||[]).length-todo.length)+' already there)':'NOT FOUND: Skills box');return done()}
+function addOne(){if(i>=todo.length){log.splice(1,0,si?'OK: Skills ('+todo.length+' added, '+((D.sk||[]).length-todo.length)+' already there)':'NOT FOUND: Skills box');return pass++==1?items():done()}
 var s=todo[i++];si.focus();
 if(ul&&ul.length){try{ul.tagit('createTag',s);return setTimeout(addOne,200)}catch(x){}}
 setv(si,s);key(si,13);
 setTimeout(function(){if(si.value==s){var b=null,a=si.parentElement;for(var d=0;d<3&&a&&!b;d++){b=[].filter.call(a.querySelectorAll('button,a,input[type=button],span,i'),function(x){return x!=si&&/^\s*(\+|add)/i.test((x.innerText||x.value||x.className||'').trim())})[0];a=a.parentElement}if(b)b.click();else key(si,188)}setTimeout(addOne,300)},300)}
-function done(){var cc=q('[name=jobsearch_field_resume_cover_letter]');log.push('','CHECK: cover letter box now has '+(cc?cc.value.length:'no')+' characters; skills area shows: '+(box?box.innerText.replace(/\s+/g,' ').trim().slice(0,200):'-'));var ed=vals('jobsearch_field_education_title'),ex=vals('jobsearch_field_experience_title'),co=vals('jobsearch_field_experience_company'),la=vals('jobsearch_field_lang_title');log.push('','SAVED ON YOUR RESUME:','Education ('+ed.length+'): '+ed.join('; '),'Experience ('+ex.length+'):');
+function done(){ban.remove();log=log.filter(function(l,k){return !l||log.indexOf(l)==k});var cc=q('[name=jobsearch_field_resume_cover_letter]');log.push('','CHECK: cover letter box now has '+(cc?cc.value.length:'no')+' characters; skills area shows: '+(box?box.innerText.replace(/\s+/g,' ').trim().slice(0,200):'-'));var ed=vals('jobsearch_field_education_title'),ex=vals('jobsearch_field_experience_title'),co=vals('jobsearch_field_experience_company'),la=vals('jobsearch_field_lang_title');log.push('','SAVED ON YOUR RESUME:','Education ('+ed.length+'): '+ed.join('; '),'Experience ('+ex.length+'):');
 ex.forEach(function(t,i){log.push('- '+t+(co[i]?' @ '+co[i]:''))});
 log.push('Languages ('+la.length+'): '+la.join(', '));var b=document.createElement('div');b.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:2147483647;background:#fff;border:2px solid #1a7f37;border-radius:10px;padding:12px;font:15px sans-serif;white-space:pre-wrap;max-height:55vh;overflow:auto';
 b.textContent=log.join('\n')+'\n\nTap this box to copy it, then paste it to Claude so the saved entries can be checked.\nThen tick the Terms box yourself and tap Save.';b.onclick=function(){try{navigator.clipboard.writeText(b.textContent)}catch(x){}b.remove()};document.body.appendChild(b)}
@@ -39,8 +39,9 @@ if(c){setv(c,D.cl);if(window.tinymce&&tinymce.editors){[].forEach.call(tinymce.e
 si=null;[0,1].forEach(function(pass){[].forEach.call(document.querySelectorAll('input[type=text]'),function(e){if(si||e.name||e.id||(!pass&&!vis(e)))return;var l=(e.placeholder||'')+' '+((e.closest('label,li,div')||{}).innerText||'');if(/skill/i.test(l))si=e})});
 box=si&&(si.closest('ul')||si.parentElement.parentElement);have=box?box.innerText.toLowerCase():'';
 todo=(D.sk||[]).filter(function(s){return have.indexOf(s.toLowerCase())<0});i=0;
-ul=$&&$.fn.tagit&&si?$(si).closest('ul.tagit'):null;
-if(si)addOne();else{log.splice(1,0,'NOT FOUND: Skills box');done()}}
+ul=null;if($&&$.fn.tagit){ul=$('ul,input,textarea').filter(function(){var d=$(this).data();return d&&(d['ui-tagit']||d.uiTagit)}).first();if(!ul.length)ul=si?$(si).closest('ul.tagit'):null}
+if(si)addOne();else{log.splice(1,0,'NOT FOUND: Skills box');pass++==1?items():done()}}
 var c,si,box,have,todo,i=0,ul;
-items();
+var pass=1,ban=document.createElement('div');ban.style.cssText='position:fixed;left:0;right:0;top:0;z-index:2147483647;background:#b00;color:#fff;padding:10px;font:bold 15px sans-serif;text-align:center';ban.textContent='rj is still working here. Do not tap Update Resume yet.';document.body.appendChild(ban);
+phase2();
 })();
