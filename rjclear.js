@@ -11,14 +11,17 @@ else{if(!e.value)return;var p=e.tagName=='TEXTAREA'?win.HTMLTextAreaElement.prot
 fire(e);e.style.background='#ffe0e0';n++});
 [].forEach.call(d.querySelectorAll('[name=jobsearch_field_resume_cover_letter],[name=user_bio]'),function(c){if(win.tinymce&&win.tinymce.editors)[].forEach.call(win.tinymce.editors,function(ed){try{if(ed.getElement()==c){ed.setContent('');ed.save()}}catch(x){}})});
 // entries: remove each saved education / experience / language block from the form
-var m=0;['education','experience','lang'].forEach(function(t){[].slice.call(d.querySelectorAll('[name="jobsearch_field_'+t+'_title[]"]')).forEach(function(e){var a=e;while(a.parentElement&&a.parentElement!=d.body&&a.parentElement.querySelectorAll('[name="jobsearch_field_'+t+'_title[]"]').length==1)a=a.parentElement;a.remove();m++})});
+var m=0,DEL=/(^|[^a-z])(del|delete|remove|rubbish|trash|bin)([^a-z]|$)|del-|delete|remove|rubbish|trash/i;win.__rjq=[];
+['education','experience','lang'].forEach(function(t){var sel='[name="jobsearch_field_'+t+'_title[]"]';[].slice.call(d.querySelectorAll(sel)).forEach(function(e){var a=e,ctl=null;
+while(a.parentElement&&a.parentElement!=d.body&&a.parentElement.querySelectorAll(sel).length==1){a=a.parentElement;ctl=[].filter.call(a.querySelectorAll('a,button,i,span'),function(x){var t2=(x.className&&x.className.baseVal!=null?x.className.baseVal:x.className||'')+' '+(x.title||'')+' '+(x.getAttribute('aria-label')||'')+' '+(x.children.length?'':x.textContent||'');return DEL.test(t2)})[0];if(ctl)break}
+if(ctl){win.__rjq.push(ctl.closest('a,button')||ctl);m++}})});
 // skills: remove the tags next to the Add Skills box
 var si=null;[].forEach.call(d.querySelectorAll('input[type=text]'),function(e){if(si||e.name||e.id)return;var l=(e.placeholder||'')+' '+((e.closest('label,li,div')||{}).innerText||'');if(/skill/i.test(l))si=e});
 if(si){var ul=si.closest('ul');if(ul)[].slice.call(ul.children).forEach(function(li){if(!li.contains(si)){li.remove();k++}})}
 // skills: click each tag's remove button
 [].forEach.call(d.querySelectorAll('.tagit-close,a.tagit-close,[class*=skill] [class*=remove],[class*=skill] [class*=close],[class*=skill] [class*=delete]'),function(x){try{x.click();k++}catch(e){}});
-return n+' fields emptied, '+m+' resume entries and '+k+' skills removed'}
-function box(d,t){var b=d.createElement('div');b.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:2147483647;background:#fff;border:2px solid #c00;border-radius:10px;padding:12px;font:15px sans-serif;white-space:pre-wrap';b.textContent=t+'\n\nCheck the page, then tick Terms and tap Save yourself.\n(Tap this box to close.)';b.onclick=function(){b.remove()};d.body.appendChild(b)}
+return n+' fields emptied, '+k+' skills removed'+(m?', deleting '+m+' resume entries...':'')}
+function box(d,t){var b=d.createElement('div');b.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:2147483647;background:#fff;border:2px solid #c00;border-radius:10px;padding:12px;font:15px sans-serif;white-space:pre-wrap';b.textContent=t+'\n\nCheck the page, then tick Terms and tap Save yourself.\n(Tap this box to close.)';b.onclick=function(){b.remove()};d.body.appendChild(b);var w=d.defaultView,Q=w.__rjq||[],i=0;if(!Q.length)return;var oc=w.confirm;w.confirm=function(){return true};(function go(){if(i>=Q.length){w.confirm=oc;b.textContent=b.textContent.replace('deleting '+Q.length+' resume entries...',Q.length+' resume entries deleted');return}try{Q[i].click()}catch(x){}i++;setTimeout(go,1500)})()}
 if(/my-resume/.test(location.search)||document.querySelector('[name=user_phone],[name=u_firstname]'))return box(document,clear(window));
 var old=document.getElementById('rjpanel');if(old)old.remove();
 var P=document.createElement('div');P.id='rjpanel';P.style.cssText='position:fixed;inset:0;z-index:2147483646;background:#fff;display:flex;flex-direction:column;font:15px sans-serif';
