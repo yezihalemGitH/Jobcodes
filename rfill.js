@@ -56,10 +56,24 @@ var P=await get('profile'),DR=await get('draft');
 function home(){
 var h='<h2>ReporterFill</h2>';
 if(!/user-dashboard/.test(location.pathname)){h+='<div class="warn">Log in to Reporter Jobs first and open your dashboard, then tap the bookmark again.<br><br>New to Reporter Jobs? Tap Register on the site and create your account and password yourself. ReporterFill never asks for your password.</div><a class="b" href="/user-dashboard/">Open my dashboard</a>'}
-if(P){h+='<p>Hello '+esc(P.first)+'. Your details are saved on this phone.</p><button id=rffill>Fill my Reporter Jobs profile</button><button id=rfupd class=g>Update one part</button><button id=rfnew class=g>Start again from my CV</button><button id=rfdel class=r>Delete my details from this phone</button>'}
+if(P){h+='<p>Hello '+esc(P.first)+'. Your details are saved on this phone.</p><button id=rffill>Fill my Reporter Jobs profile</button><button id=rfupd class=g>Update one part</button><button id=rffiles class=g>My saved files</button><button id=rfnew class=g>Start again from my CV</button><button id=rfdel class=r>Delete my details from this phone</button>'}
 else{h+='<p>This fills your Reporter Jobs Profile, Resume and CV from your own CV. Your files stay on this phone.</p><p>You will need: your CV (PDF or Word), a photo of you, and if you like, your certificates and experience letters.</p>'+(DR?'<button id=rfcont>Continue where I stopped</button>':'')+'<button id=rfnew'+(DR?' class=g':'')+'>Start: pick my CV</button>'}
+h+='<button id=rffiles class=g>My saved files</button>';
 view(h);on('#rffill',function(){fill(null)});on('#rfupd',update);on('#rfnew',pick);on('#rfcont',function(){DR.stage=='review'?review(DR,ORDER,null):ai(DR)});
-on('#rfdel',async function(){if(!confirm('Delete your saved details, CV and photo from this phone? Your Reporter Jobs account is not touched.'))return;['profile','draft','photo','cv','certs'].forEach(function(k){put(k,null)});P=DR=null;home()})}
+on('#rffiles',files);on('#rfdel',async function(){if(!confirm('Delete your saved details, CV and photo from this phone? Your Reporter Jobs account is not touched.'))return;['profile','draft','photo','cv','certs'].forEach(function(k){put(k,null)});P=DR=null;home()})}
+
+// ---------- my saved files ----------
+function kb(b){return b&&b.size?Math.max(1,Math.round(b.size/1024))+' KB':''}
+async function files(){var ph=await get('photo'),cv=await get('cv'),ce=await get('certs')||[],it=[],u=[];
+if(ph)it.push({k:'photo',name:((P&&P.first)||'my')+'-photo.jpg',blob:ph});if(cv)it.push({k:'cv',name:cv.name,blob:cv.blob});ce.forEach(function(c,i){it.push({k:'cert',i:i,name:c.name,blob:c.blob})});
+var h='<h2>My saved files</h2><p>These copies are kept inside this browser for Reporter Jobs. Tap <b>Save to phone</b> to put a copy in My Files &gt; Download.</p>';
+if(!it.length)h+='<div class=warn>No files saved yet.</div>';
+it.forEach(function(f,j){var url=URL.createObjectURL(f.blob);u.push(url);h+='<div class=card><b>'+(f.k=='photo'?'Photo':f.k=='cv'?'CV':'Certificate / letter')+'</b><br>'+esc(f.name)+' '+kb(f.blob)+(/^image\//.test(f.blob.type||'')||f.k=='photo'?'<br><img src="'+url+'" style="max-width:100%;max-height:220px;margin-top:6px;border-radius:6px">':'')+
+'<a class="b" href="'+url+'" download="'+esc(f.name)+'">Save to phone</a>'+(f.k=='cert'?'<button class=r data-rmc='+f.i+'>Remove from ReporterFill</button>':'')+'</div>'});
+h+='<div class=card><label><b>Add certificates or letters</b></label><input type=file id=rfadd multiple accept=".pdf,.doc,.docx,image/*"></div><button id=rfb class=g>Back</button>';view(h);
+on('#rfb',function(){u.forEach(URL.revokeObjectURL);home()});
+W.onclick=async function(ev){var i=ev.target.dataset.rmc;if(i==null)return;if(!confirm('Remove this file from ReporterFill? Your own copy on the phone is not touched.'))return;ce.splice(+i,1);await put('certs',ce);files()};
+$('#rfadd').onchange=async function(){var n=[].slice.call(this.files).map(function(f){return {blob:f,name:f.name,type:f.type}});await put('certs',ce.concat(n));files()}}
 
 // ---------- step 1: files ----------
 async function pick(){var ph=await get('photo'),cv=await get('cv'),ce=await get('certs')||[];
