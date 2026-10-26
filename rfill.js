@@ -66,12 +66,16 @@ on('#rffiles',files);on('#rfdel',async function(){if(!confirm('Delete your saved
 function kb(b){return b&&b.size?Math.max(1,Math.round(b.size/1024))+' KB':''}
 async function files(){var ph=await get('photo'),cv=await get('cv'),ce=await get('certs')||[],it=[],u=[];
 if(ph)it.push({k:'photo',name:((P&&P.first)||'my')+'-photo.jpg',blob:ph});if(cv)it.push({k:'cv',name:cv.name,blob:cv.blob});ce.forEach(function(c,i){it.push({k:'cert',i:i,name:c.name,blob:c.blob})});
-var h='<h2>My saved files</h2><p>These copies are kept inside this browser for Reporter Jobs. Tap <b>Save to phone</b> to put a copy in My Files &gt; Download.</p>';
+var h='<h2>My saved files</h2><p>These copies are kept inside this browser for Reporter Jobs. Tap <b>Save to phone</b> to put a copy in My Files &gt; Download'+(window.RFApp?' &gt; Job Documents':'')+'.</p>';
 if(!it.length)h+='<div class=warn>No files saved yet.</div>';
 it.forEach(function(f,j){var url=URL.createObjectURL(f.blob);u.push(url);h+='<div class=card><b>'+(f.k=='photo'?'Photo':f.k=='cv'?'CV':'Certificate / letter')+'</b><br>'+esc(f.name)+' '+kb(f.blob)+(/^image\//.test(f.blob.type||'')||f.k=='photo'?'<br><img src="'+url+'" style="max-width:100%;max-height:220px;margin-top:6px;border-radius:6px">':'')+
 '<a class="b" href="'+url+'" download="'+esc(f.name)+'">Save to phone</a>'+(f.k=='cert'?'<button class=r data-rmc='+f.i+'>Remove from ReporterFill</button>':'')+'</div>'});
-h+='<div class=card><label><b>Add certificates or letters</b></label><input type=file id=rfadd multiple accept=".pdf,.doc,.docx,image/*"></div><button id=rfb class=g>Back</button>';view(h);
+if(it.length)h+='<button id=rfall>Save all to phone</button>';h+='<div class=card><label><b>Add certificates or letters</b></label><input type=file id=rfadd multiple accept=".pdf,.doc,.docx,image/*"></div><button id=rfb class=g>Back</button>';view(h);
 on('#rfb',function(){u.forEach(URL.revokeObjectURL);home()});
+async function save1(f){if(!window.RFApp){var l=document.createElement('a');l.href=URL.createObjectURL(f.blob);l.download=f.name;document.body.appendChild(l);l.click();l.remove();return 'ok'}
+return RFApp.save(b64(new Uint8Array(await f.blob.arrayBuffer())),f.name,f.blob.type||'')}
+[].forEach.call(W.querySelectorAll('#rf a.b[download]'),function(a,j){a.onclick=async function(ev){if(!window.RFApp)return;ev.preventDefault();var r=await save1(it[j]);a.textContent=r=='ok'?'Saved in My Files > Download > Job Documents':r}});
+on('#rfall',async function(){var b=this,n=0;b.textContent='Saving...';for(var j=0;j<it.length;j++){if(await save1(it[j])=='ok')n++}b.textContent=n+' of '+it.length+' saved'+(window.RFApp?' in My Files > Download > Job Documents':' to Download')});
 W.onclick=async function(ev){var i=ev.target.dataset.rmc;if(i==null)return;if(!confirm('Remove this file from ReporterFill? Your own copy on the phone is not touched.'))return;ce.splice(+i,1);await put('certs',ce);files()};
 $('#rfadd').onchange=async function(){var n=[].slice.call(this.files).map(function(f){return {blob:f,name:f.name,type:f.type}});await put('certs',ce.concat(n));files()}}
 
