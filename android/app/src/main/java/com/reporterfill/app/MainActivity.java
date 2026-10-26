@@ -3,9 +3,15 @@ package com.reporterfill.app;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.util.Base64;
+import android.webkit.JavascriptInterface;
 import android.webkit.CookieManager;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
@@ -13,13 +19,14 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import java.io.OutputStream;
 import java.util.ArrayList;
 
 // Opens Ethiopian Reporter Jobs and adds a ReporterFill button to its pages.
 // The applicant logs in and taps Save themselves; the app never stores passwords.
 public class MainActivity extends Activity {
     static final String HOME = "https://www.ethiopianreporterjobs.com/user-dashboard/";
-    static final String RFILL = "https://cdn.jsdelivr.net/gh/yezihalemGitH/jobcodes@f65cb249de/rfill.js";
+    static final String RFILL = "https://cdn.jsdelivr.net/gh/yezihalemGitH/jobcodes@9df38d6f0e/rfill.js";
     static final String BUTTON = "(function(){if(document.getElementById('rfbtn')||!document.body)return;"
         + "var b=document.createElement('button');b.id='rfbtn';b.textContent='ReporterFill';"
         + "b.style.cssText='position:fixed;right:12px;bottom:12px;z-index:2147483645;padding:12px 16px;border:0;border-radius:24px;background:#1a7f37;color:#fff;font:bold 15px sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.3)';"
@@ -42,6 +49,26 @@ public class MainActivity extends Activity {
         s.setJavaScriptCanOpenWindowsAutomatically(true);
         s.setSupportMultipleWindows(false);
         CookieManager.getInstance().setAcceptCookie(true);
+        // lets ReporterFill save files into Download/Job Documents on the phone
+        web.addJavascriptInterface(new Object() {
+            @JavascriptInterface
+            public String save(String b64, String name, String mime) {
+                if (Build.VERSION.SDK_INT < 29) return "This phone's Android is too old to save from the app. Use Chrome instead.";
+                try {
+                    ContentValues v = new ContentValues();
+                    v.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
+                    v.put(MediaStore.MediaColumns.MIME_TYPE, mime == null || mime.isEmpty() ? "application/octet-stream" : mime);
+                    v.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Job Documents");
+                    Uri u = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+                    OutputStream o = getContentResolver().openOutputStream(u);
+                    o.write(Base64.decode(b64, Base64.DEFAULT));
+                    o.close();
+                    return "ok";
+                } catch (Exception e) {
+                    return "Could not save: " + e.getMessage();
+                }
+            }
+        }, "RFApp");
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
