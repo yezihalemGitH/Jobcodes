@@ -19,7 +19,7 @@ import java.util.ArrayList;
 // The applicant logs in and taps Save themselves; the app never stores passwords.
 public class MainActivity extends Activity {
     static final String HOME = "https://www.ethiopianreporterjobs.com/user-dashboard/";
-    static final String RFILL = "https://cdn.jsdelivr.net/gh/yezihalemGitH/jobcodes@e562a31811/rfill.js";
+    static final String RFILL = "https://cdn.jsdelivr.net/gh/yezihalemGitH/jobcodes@f65cb249de/rfill.js";
     static final String BUTTON = "(function(){if(document.getElementById('rfbtn')||!document.body)return;"
         + "var b=document.createElement('button');b.id='rfbtn';b.textContent='ReporterFill';"
         + "b.style.cssText='position:fixed;right:12px;bottom:12px;z-index:2147483645;padding:12px 16px;border:0;border-radius:24px;background:#1a7f37;color:#fff;font:bold 15px sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.3)';"
