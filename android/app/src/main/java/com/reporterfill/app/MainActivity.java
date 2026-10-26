@@ -26,7 +26,7 @@ import java.util.ArrayList;
 // The applicant logs in and taps Save themselves; the app never stores passwords.
 public class MainActivity extends Activity {
     static final String HOME = "https://www.ethiopianreporterjobs.com/user-dashboard/";
-    static final String RFILL = "https://cdn.jsdelivr.net/gh/yezihalemGitH/jobcodes@9df38d6f0e/rfill.js";
+    static final String RFILL = "https://cdn.jsdelivr.net/gh/yezihalemGitH/jobcodes@9e35889395/rfill.js";
     static final String BUTTON = "(function(){if(document.getElementById('rfbtn')||!document.body)return;"
         + "var b=document.createElement('button');b.id='rfbtn';b.textContent='ReporterFill';"
         + "b.style.cssText='position:fixed;right:12px;bottom:12px;z-index:2147483645;padding:12px 16px;border:0;border-radius:24px;background:#1a7f37;color:#fff;font:bold 15px sans-serif;box-shadow:0 2px 6px rgba(0,0,0,.3)';"
@@ -49,6 +49,8 @@ public class MainActivity extends Activity {
         s.setJavaScriptCanOpenWindowsAutomatically(true);
         s.setSupportMultipleWindows(false);
         CookieManager.getInstance().setAcceptCookie(true);
+        // login and robot checks on the site use cookies from other domains
+        CookieManager.getInstance().setAcceptThirdPartyCookies(web, true);
         // lets ReporterFill save files into Download/Job Documents on the phone
         web.addJavascriptInterface(new Object() {
             @JavascriptInterface
@@ -72,6 +74,8 @@ public class MainActivity extends Activity {
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
+                // frames inside the page (robot checks, login widgets) load normally
+                if (!r.isForMainFrame()) return false;
                 Uri u = r.getUrl();
                 String h = u.getHost() == null ? "" : u.getHost();
                 if (h.endsWith("ethiopianreporterjobs.com")) return false;
@@ -82,6 +86,7 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView v, String url) {
+                CookieManager.getInstance().flush();
                 v.evaluateJavascript(BUTTON, null);
             }
         });
