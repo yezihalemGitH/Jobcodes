@@ -1,7 +1,8 @@
 (function(){
 // Reporter Jobs "My Resume" filler. Personal data comes from window.RJR, set by the bookmark.
 var D=window.RJR||{},$=window.jQuery,log=[];
-if(!D.cl){alert('rjresume: no data. Use the rjresume bookmark, not this file.');return}
+if(!D.cl&&!(D.items||[]).length){alert('rjresume: no data. Use the ReporterFill bookmark, not this file.');return}
+function want(k){return !window.RFONLY||RFONLY.indexOf(k)>=0}
 function q(s){return document.querySelector(s)}
 function vis(e){return !!(e.offsetWidth||e.offsetHeight||e.getClientRects().length)}
 function setv(e,v){var p=e.tagName=='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype;Object.getOwnPropertyDescriptor(p,'value').set.call(e,v);['input','change'].forEach(function(x){e.dispatchEvent(new Event(x,{bubbles:true}))})}
@@ -18,13 +19,13 @@ setTimeout(function(){if(si.value==s){var b=null,a=si.parentElement;for(var d=0;
 function done(){ban.remove();log=log.filter(function(l,k){return !l||log.indexOf(l)==k});var cc=q('[name=jobsearch_field_resume_cover_letter]');log.push('','CHECK: cover letter box now has '+(cc?cc.value.length:'no')+' characters; skills area shows: '+(box?box.innerText.replace(/\s+/g,' ').trim().slice(0,200):'-'));var ed=vals('jobsearch_field_education_title'),ex=vals('jobsearch_field_experience_title'),co=vals('jobsearch_field_experience_company'),la=vals('jobsearch_field_lang_title');log.push('','SAVED ON YOUR RESUME:','Education ('+ed.length+'): '+ed.join('; '),'Experience ('+ex.length+'):');
 ex.forEach(function(t,i){log.push('- '+t+(co[i]?' @ '+co[i]:''))});
 log.push('Languages ('+la.length+'): '+la.join(', '));var b=document.createElement('div');b.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:2147483647;background:#fff;border:2px solid #1a7f37;border-radius:10px;padding:12px;font:15px sans-serif;white-space:pre-wrap;max-height:55vh;overflow:auto';
-b.textContent=log.join('\n')+'\n\nTap this box to copy it, then paste it to Claude so the saved entries can be checked.\nThen tick the Terms box yourself and tap Save.';b.onclick=function(){try{navigator.clipboard.writeText(b.textContent)}catch(x){}b.remove()};document.body.appendChild(b)}
+b.textContent=log.join('\n')+'\n\nCheck the saved entries above. If you changed an entry, delete the old one on the page (bin icon). Tap this box to close it.\nThen tick the Terms box yourself and tap Save.';b.onclick=function(){try{navigator.clipboard.writeText(b.textContent)}catch(x){}b.remove()};document.body.appendChild(b)}
 // entries: add the education, experience and language items not already saved
 var have2={edu:ed,expr:ex,lang:la},NM={edu:'Education',expr:'Experience',lang:'Language'},add=[],j=0;
 function byId(id){return document.getElementById(id)}
-function setId(id,v){var e=byId(id);if(!e)return null;if(e.tagName=='SELECT')[].forEach.call(e.options,function(o){if(o.text.trim().toLowerCase()==v.toLowerCase())e.value=o.value});else setv(e,v);e.dispatchEvent(new Event('blur',{bubbles:true}));if($)try{$(e).trigger('change')}catch(x){}return e}
+function setId(id,v){var e=byId(id);if(!e)return null;if(e.tagName=='SELECT'){var lv=String(v||'').toLowerCase(),m=[].filter.call(e.options,function(o){return o.text.trim().toLowerCase()==lv})[0]||[].filter.call(e.options,function(o){return lv&&o.value&&o.text.trim().toLowerCase().indexOf(lv)==0})[0];if(m)e.value=m.value}else setv(e,v);e.dispatchEvent(new Event('blur',{bubbles:true}));if($)try{$(e).trigger('change')}catch(x){}return e}
 function btn(el){var a=el.parentElement;while(a&&a!=document.body){var bs=a.querySelectorAll('button,input[type=submit],input[type=button],a');for(var k=0;k<bs.length;k++){var t=(bs[k].innerText||bs[k].value||'').trim();if(/^(\+\s*)?(add|save|submit|update)\b/i.test(t)&&!/cancel|close/i.test(t))return bs[k]}a=a.parentElement}return null}
-function items(){(D.items||[]).forEach(function(s){var h=have2[s[0]].map(function(x){return x.toLowerCase()});if(s[0]=='lang'&&[].some.call(document.querySelectorAll('body *:not(option):not(script)'),function(x){return [].filter.call(x.childNodes,function(t){return t.nodeType==3}).map(function(t){return t.textContent}).join('').trim().toLowerCase()==s[1].toLowerCase()&&vis(x)}))return;if(h.indexOf(s[1].toLowerCase())<0)add.push(s)});
+function items(){(D.items||[]).forEach(function(s){if(!want(s[0]))return;var h=have2[s[0]].map(function(x){return x.toLowerCase()});if(s[0]=='lang'&&[].some.call(document.querySelectorAll('body *:not(option):not(script)'),function(x){return [].filter.call(x.childNodes,function(t){return t.nodeType==3}).map(function(t){return t.textContent}).join('').trim().toLowerCase()==s[1].toLowerCase()&&vis(x)}))return;if(h.indexOf(s[1].toLowerCase())<0)add.push(s)});
 if(!add.length){log.splice(2,0,'OK: Education, experience, languages (all there)');return phase2()}next()}
 function next(){if(j>=add.length)return phase2();var s=add[j++],f;
 if(s[0]=='lang'){f=setId('add-lang-title',s[1]);setId('add-lang-level',s[2]);setId('add-lang-percentage',s[3])}
@@ -34,14 +35,14 @@ b.click();log.splice(2,0,'OK: added '+NM[s[0]]+' '+s[1]);setTimeout(next,5000)}
 function phase2(){
 // cover letter: always rewritten so contact details stay current
 c=q('[name=jobsearch_field_resume_cover_letter]');
-if(c){setv(c,D.cl);if(window.tinymce&&tinymce.editors){[].forEach.call(tinymce.editors,function(ed){try{if(ed.getElement()==c){ed.setContent(D.cl.replace(/\n/g,'<br>'));ed.save()}}catch(x){}})}c.style.background='#d7f5dd';log.push('OK: Cover letter')}else log.push('NOT FOUND: Cover letter');
+if(c&&(!want('cl')||!D.cl)){}else if(c){setv(c,D.cl);if(window.tinymce&&tinymce.editors){[].forEach.call(tinymce.editors,function(ed){try{if(ed.getElement()==c){ed.setContent(D.cl.replace(/\n/g,'<br>'));ed.save()}}catch(x){}})}c.style.background='#d7f5dd';log.push('OK: Cover letter')}else log.push('NOT FOUND: Cover letter');
 // skills: add only the ones not already there
 si=null;[0,1].forEach(function(pass){[].forEach.call(document.querySelectorAll('input[type=text]'),function(e){if(si||e.name||e.id||(!pass&&!vis(e)))return;var l=(e.placeholder||'')+' '+((e.closest('label,li,div')||{}).innerText||'');if(/skill/i.test(l))si=e})});
 box=si&&(si.closest('ul')||si.parentElement.parentElement);have=box?box.innerText.toLowerCase():'';
-todo=(D.sk||[]).filter(function(s){return have.indexOf(s.toLowerCase())<0});i=0;
+todo=(want('sk')?D.sk||[]:[]).filter(function(s){return have.indexOf(s.toLowerCase())<0});i=0;
 ul=null;if($&&$.fn.tagit){ul=$('ul,input,textarea').filter(function(){var d=$(this).data();return d&&(d['ui-tagit']||d.uiTagit)}).first();if(!ul.length)ul=si?$(si).closest('ul.tagit'):null}
 if(si)addOne();else{log.splice(1,0,'NOT FOUND: Skills box');pass++==1?items():done()}}
 var c,si,box,have,todo,i=0,ul;
-var pass=1,ban=document.createElement('div');ban.style.cssText='position:fixed;left:0;right:0;top:0;z-index:2147483647;background:#b00;color:#fff;padding:10px;font:bold 15px sans-serif;text-align:center';ban.textContent='rj is still working here. Do not tap Update Resume yet.';document.body.appendChild(ban);
+var pass=1,ban=document.createElement('div');ban.style.cssText='position:fixed;left:0;right:0;top:0;z-index:2147483647;background:#b00;color:#fff;padding:10px;font:bold 15px sans-serif;text-align:center';ban.textContent='ReporterFill is still working here. Do not tap Update Resume yet.';document.body.appendChild(ban);
 phase2();
 })();
