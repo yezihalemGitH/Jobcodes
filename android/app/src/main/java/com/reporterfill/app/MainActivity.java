@@ -1,6 +1,7 @@
 package com.reporterfill.app;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ContentValues;
@@ -79,6 +80,22 @@ public class MainActivity extends Activity {
                 Uri u = r.getUrl();
                 String h = u.getHost() == null ? "" : u.getHost();
                 if (h.endsWith("ethiopianreporterjobs.com")) return false;
+                // Google and LinkedIn refuse to sign in inside apps, and a login made in Chrome
+                // stays in Chrome, so explain instead of leaving the app
+                if (h.endsWith("accounts.google.com") || h.endsWith("linkedin.com")) {
+                    new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Use email and password here")
+                        .setMessage("Google and LinkedIn login only work in Chrome, not inside apps.\n\n"
+                            + "In this app, log in with your email and password.\n\n"
+                            + "If you always used Google and have no password: on the login page tap "
+                            + "\"Forgot password\", enter your Gmail address, and set a password from the email you get. "
+                            + "Then log in here with it.\n\n"
+                            + "Or use Chrome with the rfill bookmark, where Google login works.")
+                        .setPositiveButton("OK", null)
+                        .show();
+                    if (v.canGoBack() && r.isRedirect()) v.goBack();
+                    return true;
+                }
                 // ChatGPT, Gemini and other sites open in the phone's own browser
                 try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (ActivityNotFoundException e) { }
                 return true;
